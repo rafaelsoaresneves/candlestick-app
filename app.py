@@ -109,7 +109,15 @@ def get_data(ticker_, interval_, period_days_):
 # Carregando os dados
 try:
     ticker = yf.Ticker(symbol)
-    data = ticker.history(period="2mo")
+    #data = ticker.history(period="2mo")
+
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=period_days)
+    print(symbol)
+    print(start_date)
+    print(end_date)
+    data = yf.download("AAPL", start=start_date, end=end_date)
+    
     #data = get_data(symbol, interval, period_days)
     
     if data.empty:
