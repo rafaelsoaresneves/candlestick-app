@@ -1,12 +1,14 @@
 import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
+import plotly.express as px
 import pandas as pd
+import numpy as np
 from datetime import datetime, timedelta
 
-# Configuração inicial do Streamlit
+# Configurações iniciais
 st.set_page_config(page_title="Gráfico de Candlestick", layout="wide")
-st.title("📊 Gráfico de Candlestick Interativo com Indicadores")
+st.title("📊 Gráfico de Candlestick Interativo + Análise Técnica")
 
 # Definição dos temas
 THEMES = {
@@ -56,15 +58,16 @@ interval = interval_options[interval_display]
 
 period_days = st.sidebar.slider("Período (dias)", min_value=1, max_value=60, value=7)
 
-# Indicadores técnicos
-add_sma = st.sidebar.checkbox("Adicionar Média Móvel Simples (SMA)")
-sma_period = st.sidebar.number_input("Período da SMA", min_value=2, max_value=100, value=9, disabled=not add_sma)
+# Botão para forçar atualização
+if st.sidebar.button("🔄 Atualizar Dados"):
+    st.cache_data.clear()
+    st.experimental_rerun()
 
-add_ema = st.sidebar.checkbox("Adicionar Média Móvel Exponencial (EMA)")
-ema_period = st.sidebar.number_input("Período da EMA", min_value=2, max_value=100, value=21, disabled=not add_ema)
+# Tabs principais
+tab1, tab2 = st.tabs(["📈 Gráfico de Preço", "📉 Análise Técnica"])
 
 # Função para carregar dados
-@st.cache_data(ttl=300)  # Cache por 5 minutos
+@st.cache_data(ttl=300)
 def get_data(ticker_, interval_, period_days_):
     end_date = datetime.now()
     start_date = end_date - timedelta(days=period_days_)
@@ -83,58 +86,112 @@ try:
     if df.empty:
         st.warning("⚠️ Nenhum dado encontrado. Verifique o ticker ou período.")
     else:
-        # Adicionando indicadores
-        if add_sma:
-            df[f"SMA_{sma_period}"] = df["Close"].rolling(window=sma_period).mean()
+        with tab1:
+            st.subheader("Gráfico de Candlestick")
 
-        if add_ema:
-            df[f"EMA_{ema_period}"] = df["Close"].ewm(span=ema_period, adjust=False).mean()
+            # Indicadores técnicos
+            add_sma = st.checkbox("Adicionar Média Móvel Simples (SMA)")
+            sma_period = st.number_input("Período da SMA", min_value=2, max_value=100, value=9, disabled=not add_sma)
 
-        # Criando o gráfico de candlestick
-        fig = go.Figure(data=[go.Candlestick(
-            x=df.index,
-            open=df['Open'],
-            high=df['High'],
-            low=df['Low'],
-            close=df['Close'],
-            name='Candlesticks'
-        )])
+            add_ema = st.checkbox("Adicionar Média Móvel Exponencial (EMA)")
+            ema_period = st.number_input("Período da EMA", min_value=2, max_value=100, value=21, disabled=not add_ema)
 
-        # Adicionando indicadores
-        if add_sma:
-            fig.add_trace(go.Scatter(
-                x=df.index,
-                y=df[f"SMA_{sma_period}"],
-                mode='lines',
-                name=f"SMA {sma_period}",
-                line=dict(color="blue")
-            ))
+            # Calculando indicadores
+            df_plot = df.copy()
 
-        if add_ema:
-            fig.add_trace(go.Scatter(
-                x=df.index,
-                y=df[f"EMA_{ema_period}"],
-                mode='lines',
-                name=f"EMA {ema_period}",
-                line=dict(color="orange")
-            ))
+            if add_sma:
+                df_plot[f"SMA_{sma_period}"] = df_plot["Close"].rolling(window=sma_period).mean()
 
-        # Layout do gráfico
-        fig.update_layout(
-            title=f"{ticker} - Gráfico de Candlestick ({interval_display})",
-            xaxis_title="Data",
-            yaxis_title="Preço",
-            xaxis_rangeslider_visible=False,
-            template=selected_theme["plot_template"],
-            height=800
-        )
+            if add_ema:
+                df_plot[f"EMA_{ema_period}"] = df_plot["Close"].ewm(span=ema_period, adjust=False).mean()
 
-        # Mostrar gráfico
-        st.plotly_chart(fig, use_container_width=True)
+            # Criando o gráfico de candlestick
+            fig = go.Figure(data=[go.Candlestick(
+                x=df_plot.index,
+                open=df_plot['Open'],
+                high=df_plot['High'],
+                low=df_plot['Low'],
+                close=df_plot['Close'],
+                name='Candlesticks'
+            )])
 
-        # Mostrar dados brutos (opcional)
-        if st.checkbox("Mostrar dados brutos"):
-            st.dataframe(df.tail(100))
+            if add_sma:
+                fig.add_trace(go.Scatter(
+                    x=df_plot.index,
+                    y=df_plot[f"SMA_{sma_period}"],
+                    mode='lines',
+                    name=f"SMA {sma_period}",
+                    line=dict(color="blue")
+                ))
+
+            if add_ema:
+                fig.add_trace(go.Scatter(
+                    x=df_plot.index,
+                    y=df_plot[f"EMA_{ema_period}"],
+                    mode='lines',
+                    name=f"EMA {ema_period}",
+                    line=dict(color="orange")
+                ))
+
+            fig.update_layout(
+                title=f"{ticker} - Gráfico de Candlestick ({interval_display})",
+                xaxis_title="Data",
+                yaxis_title="Preço",
+                xaxis_rangeslider_visible=False,
+                template=selected_theme["plot_template"],
+                height=800
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
+
+        with tab2:
+            st.subheader("Indicadores Técnicos Adicionais")
+
+            # RSI
+            add_rsi = st.checkbox("Mostrar RSI (Relative Strength Index)")
+            rsi_period = st.number_input("Período do RSI", min_value=2, max_value=30, value=14, disabled=not add_rsi)
+
+            # MACD
+            add_macd = st.checkbox("Mostrar MACD (Moving Average Convergence Divergence)")
+
+            df_ta = df.copy()
+
+            # Cálculo do RSI
+            if add_rsi:
+                delta = df_ta['Close'].diff()
+                gain = delta.where(delta > 0, 0)
+                loss = -delta.where(delta < 0, 0)
+
+                avg_gain = gain.rolling(rsi_period).mean()
+                avg_loss = loss.rolling(rsi_period).mean()
+
+                rs = avg_gain / avg_loss
+                df_ta['RSI'] = 100 - (100 / (1 + rs))
+
+                fig_rsi = go.Figure()
+                fig_rsi.add_trace(go.Scatter(x=df_ta.index, y=df_ta['RSI'], mode='lines', name='RSI'))
+                fig_rsi.add_hline(y=70, line_dash="dash", line_color="red")
+                fig_rsi.add_hline(y=30, line_dash="dash", line_color="green")
+                fig_rsi.update_layout(title="RSI", template=selected_theme["plot_template"])
+                st.plotly_chart(fig_rsi, use_container_width=True)
+
+            # Cálculo do MACD
+            if add_macd:
+                df_ta['EMA12'] = df_ta['Close'].ewm(span=12, adjust=False).mean()
+                df_ta['EMA26'] = df_ta['Close'].ewm(span=26, adjust=False).mean()
+                df_ta['MACD'] = df_ta['EMA12'] - df_ta['EMA26']
+                df_ta['Signal_Line'] = df_ta['MACD'].ewm(span=9, adjust=False).mean()
+
+                fig_macd = go.Figure()
+                fig_macd.add_trace(go.Scatter(x=df_ta.index, y=df_ta['MACD'], mode='lines', name='MACD'))
+                fig_macd.add_trace(go.Scatter(x=df_ta.index, y=df_ta['Signal_Line'], mode='lines', name='Linha de Sinal'))
+                fig_macd.add_trace(go.Bar(x=df_ta.index, y=df_ta['MACD'] - df_ta['Signal_Line'], name='Histograma'))
+                fig_macd.update_layout(title="MACD", template=selected_theme["plot_template"])
+                st.plotly_chart(fig_macd, use_container_width=True)
+
+            # Mostrar dados brutos (opcional)
+            if st.checkbox("Mostrar dados brutos"):
+                st.dataframe(df.tail(100))
 
 except Exception as e:
     st.error(f"❌ Ocorreu um erro ao carregar os dados: {e}")
