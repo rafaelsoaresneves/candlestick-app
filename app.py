@@ -43,7 +43,7 @@ st.markdown(f"""
 # Retrieve AAPL historical data
 symbol = "AAPL"
 ticker = yf.Ticker(symbol)
-data = ticker.history(period="6mo")
+data = ticker.history(period="2mo")
 
 # Create candlestick chart
 fig = go.Figure(data=[go.Candlestick(x=data.index,
