@@ -86,7 +86,7 @@ if st.sidebar.button("🔄 Atualizar Dados"):
 #tab1, tab2 = st.tabs(["📈 Gráfico de Preço", "📉 Análise Técnica"])
 
 # Função para carregar dados
-@st.cache_data(ttl=300)
+#@st.cache_data(ttl=300)
 def get_data(ticker_, interval_, period_days_):
     end_date = datetime.now()
     start_date = end_date - timedelta(days=period_days_)
@@ -100,17 +100,16 @@ def get_data(ticker_, interval_, period_days_):
         data.dropna(inplace=True)  # Remove linhas vazias
 
         # Garantir que o índice seja DatetimeIndex
-        if not isinstance(data.index, pd.DatetimeIndex):
-            data.index = pd.to_datetime(data.index)
+        #if not isinstance(data.index, pd.DatetimeIndex):
+        #    data.index = pd.to_datetime(data.index)
 
     return data
 
 # Carregando os dados
 try:
-    #df = get_data(ticker, interval, period_days)
-
     ticker = yf.Ticker(symbol)
-    data = ticker.history(period="2mo")
+    data = get_data(ticker, interval, period_days)
+    #data = ticker.history(period="2mo")
 
     if data.empty:
         st.warning("⚠️ Nenhum dado encontrado. Verifique o ticker ou período.")
