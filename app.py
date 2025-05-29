@@ -107,8 +107,8 @@ def get_data(ticker_, interval_, period_days_):
 
 # Carregando os dados
 try:
-    ticker = yf.Ticker(symbol)
-    data = get_data(ticker, interval, period_days)
+    #ticker = yf.Ticker(symbol)
+    data = get_data(symbol, interval, period_days)
     #data = ticker.history(period="2mo")
 
     if data.empty:
