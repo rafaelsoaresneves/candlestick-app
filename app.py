@@ -83,7 +83,7 @@ if st.sidebar.button("🔄 Atualizar Dados"):
     st.rerun()
 
 # Tabs principais
-tab1, tab2 = st.tabs(["📈 Gráfico de Preço", "📉 Análise Técnica"])
+#tab1, tab2 = st.tabs(["📈 Gráfico de Preço", "📉 Análise Técnica"])
 
 # Função para carregar dados
 @st.cache_data(ttl=300)
