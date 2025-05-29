@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 
-# Configurações iniciais
+# Configuração inicial do Streamlit
 st.set_page_config(page_title="Gráfico de Candlestick", layout="wide")
 st.title("📊 Gráfico de Candlestick Interativo + Análise Técnica")
 
@@ -77,6 +77,8 @@ def get_data(ticker_, interval_, period_days_):
         end=end_date,
         interval=interval_
     )
+    if not data.empty:
+        data.dropna(inplace=True)  # Remove linhas vazias
     return data
 
 # Carregando os dados
@@ -89,60 +91,65 @@ try:
         with tab1:
             st.subheader("Gráfico de Candlestick")
 
-            # Indicadores técnicos
-            add_sma = st.checkbox("Adicionar Média Móvel Simples (SMA)")
-            sma_period = st.number_input("Período da SMA", min_value=2, max_value=100, value=9, disabled=not add_sma)
+            if len(df) < 2:
+                st.warning("⚠️ Poucos dados para exibir o gráfico.")
+            else:
+                st.success("✅ Dados carregados. Gerando gráfico...")
 
-            add_ema = st.checkbox("Adicionar Média Móvel Exponencial (EMA)")
-            ema_period = st.number_input("Período da EMA", min_value=2, max_value=100, value=21, disabled=not add_ema)
+                # Indicadores técnicos
+                add_sma = st.checkbox("Adicionar Média Móvel Simples (SMA)")
+                sma_period = st.number_input("Período da SMA", min_value=2, max_value=100, value=9, disabled=not add_sma)
 
-            # Calculando indicadores
-            df_plot = df.copy()
+                add_ema = st.checkbox("Adicionar Média Móvel Exponencial (EMA)")
+                ema_period = st.number_input("Período da EMA", min_value=2, max_value=100, value=21, disabled=not add_ema)
 
-            if add_sma:
-                df_plot[f"SMA_{sma_period}"] = df_plot["Close"].rolling(window=sma_period).mean()
+                # Calculando indicadores
+                df_plot = df.copy()
 
-            if add_ema:
-                df_plot[f"EMA_{ema_period}"] = df_plot["Close"].ewm(span=ema_period, adjust=False).mean()
+                if add_sma:
+                    df_plot[f"SMA_{sma_period}"] = df_plot["Close"].rolling(window=sma_period).mean()
 
-            # Criando o gráfico de candlestick
-            fig = go.Figure(data=[go.Candlestick(
-                x=df_plot.index,
-                open=df_plot['Open'],
-                high=df_plot['High'],
-                low=df_plot['Low'],
-                close=df_plot['Close'],
-                name='Candlesticks'
-            )])
+                if add_ema:
+                    df_plot[f"EMA_{ema_period}"] = df_plot["Close"].ewm(span=ema_period, adjust=False).mean()
 
-            if add_sma:
-                fig.add_trace(go.Scatter(
+                # Criando o gráfico de candlestick
+                fig = go.Figure(data=[go.Candlestick(
                     x=df_plot.index,
-                    y=df_plot[f"SMA_{sma_period}"],
-                    mode='lines',
-                    name=f"SMA {sma_period}",
-                    line=dict(color="blue")
-                ))
+                    open=df_plot['Open'],
+                    high=df_plot['High'],
+                    low=df_plot['Low'],
+                    close=df_plot['Close'],
+                    name='Candlesticks'
+                )])
 
-            if add_ema:
-                fig.add_trace(go.Scatter(
-                    x=df_plot.index,
-                    y=df_plot[f"EMA_{ema_period}"],
-                    mode='lines',
-                    name=f"EMA {ema_period}",
-                    line=dict(color="orange")
-                ))
+                if add_sma:
+                    fig.add_trace(go.Scatter(
+                        x=df_plot.index,
+                        y=df_plot[f"SMA_{sma_period}"],
+                        mode='lines',
+                        name=f"SMA {sma_period}",
+                        line=dict(color="blue")
+                    ))
 
-            fig.update_layout(
-                title=f"{ticker} - Gráfico de Candlestick ({interval_display})",
-                xaxis_title="Data",
-                yaxis_title="Preço",
-                xaxis_rangeslider_visible=False,
-                template=selected_theme["plot_template"],
-                height=800
-            )
+                if add_ema:
+                    fig.add_trace(go.Scatter(
+                        x=df_plot.index,
+                        y=df_plot[f"EMA_{ema_period}"],
+                        mode='lines',
+                        name=f"EMA {ema_period}",
+                        line=dict(color="orange")
+                    ))
 
-            st.plotly_chart(fig, use_container_width=True)
+                fig.update_layout(
+                    title=f"{ticker} - Gráfico de Candlestick ({interval_display})",
+                    xaxis_title="Data",
+                    yaxis_title="Preço",
+                    xaxis_rangeslider_visible=False,
+                    template=selected_theme["plot_template"],
+                    height=800
+                )
+
+                st.plotly_chart(fig, use_container_width=True)
 
         with tab2:
             st.subheader("Indicadores Técnicos Adicionais")
