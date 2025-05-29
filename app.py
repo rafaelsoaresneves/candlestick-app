@@ -1,8 +1,13 @@
+import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
-import streamlit as st
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
 
-st.title("Interactive Moving Average Envelope Visualization")
+# Configuração inicial do Streamlit
+st.set_page_config(page_title="Gráfico de Candlestick", layout="wide")
+st.title("📊 Gráfico de Candlestick Interativo + Análise Técnica")
 
 # Retrieve AAPL historical data
 symbol = "AAPL"
