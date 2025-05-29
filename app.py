@@ -113,10 +113,7 @@ try:
 
     end_date = datetime.now()
     start_date = end_date - timedelta(days=period_days)
-    print(symbol)
-    print(start_date)
-    print(end_date)
-    data = yf.download("AAPL", start=start_date, end=end_date, interval="1d")
+    data = yf.download("AAPL", start="2025-01-01", end="2025-05-28", interval="1d")
     
     #data = get_data(symbol, interval, period_days)
     
