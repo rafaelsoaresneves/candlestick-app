@@ -108,16 +108,16 @@ def get_data(ticker_, interval_, period_days_):
 
 # Carregando os dados
 try:
-    #ticker = yf.Ticker(symbol)
-    #data = ticker.history(period="3mo")
+    ticker = yf.Ticker(symbol)
+    data = ticker.history(period="3mo")
 
-    end_date = datetime.now()
+    #end_date = datetime.now()
     #start_date = end_date - timedelta(days=period_days)
     #data = yf.download("AAPL", start="2025-01-01", end="2025-01-28", interval="1d")
-    data = yf.download("AAPL", start="2020-01-01", end=end_date)
-    data.reset_index(inplace=True)  # Make it no longer an Index
-    data['Date'] = pd.to_datetime(data['Date'], format="%Y/%m/%d") 
-    data = data[['Date','Open', 'High', 'Low', 'Close']]
+    #data = yf.download("AAPL", start="2020-01-01", end=end_date)
+    #data.reset_index(inplace=True)  # Make it no longer an Index
+    #data['Date'] = pd.to_datetime(data['Date'], format="%Y/%m/%d") 
+    #data = data[['Date','Open', 'High', 'Low', 'Close']]
     
     #data = data.stack().reset_index().rename(index=str, columns={"level_1": "Symbol"}).sort_values(['Date'])
     #data = get_data(symbol, interval, period_days)
