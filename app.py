@@ -1,7 +1,6 @@
 import streamlit as st
 import yfinance as yf
 import plotly.graph_objects as go
-import plotly.express as px
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
@@ -94,62 +93,80 @@ try:
             if len(df) < 2:
                 st.warning("⚠️ Poucos dados para exibir o gráfico.")
             else:
-                st.success("✅ Dados carregados. Gerando gráfico...")
+                required_columns = ['Open', 'High', 'Low', 'Close']
+                missing_cols = [col for col in required_columns if col not in df.columns]
 
-                # Indicadores técnicos
-                add_sma = st.checkbox("Adicionar Média Móvel Simples (SMA)")
-                sma_period = st.number_input("Período da SMA", min_value=2, max_value=100, value=9, disabled=not add_sma)
+                if missing_cols:
+                    st.error(f"❌ Faltando colunas no dataset: {missing_cols}")
+                else:
+                    st.success("✅ Dados carregados. Gerando gráfico...")
 
-                add_ema = st.checkbox("Adicionar Média Móvel Exponencial (EMA)")
-                ema_period = st.number_input("Período da EMA", min_value=2, max_value=100, value=21, disabled=not add_ema)
+                    # Copiar dados para evitar alterações no original
+                    df_plot = df.copy()
 
-                # Calculando indicadores
-                df_plot = df.copy()
+                    # Garantir índice como datetime
+                    if not isinstance(df_plot.index, pd.DatetimeIndex):
+                        df_plot.index = pd.to_datetime(df_plot.index)
 
-                if add_sma:
-                    df_plot[f"SMA_{sma_period}"] = df_plot["Close"].rolling(window=sma_period).mean()
+                    # Indicadores técnicos
+                    add_sma = st.checkbox("Adicionar Média Móvel Simples (SMA)")
+                    sma_period = st.number_input("Período da SMA", min_value=2, max_value=100, value=9, disabled=not add_sma)
 
-                if add_ema:
-                    df_plot[f"EMA_{ema_period}"] = df_plot["Close"].ewm(span=ema_period, adjust=False).mean()
+                    add_ema = st.checkbox("Adicionar Média Móvel Exponencial (EMA)")
+                    ema_period = st.number_input("Período da EMA", min_value=2, max_value=100, value=21, disabled=not add_ema)
 
-                # Criando o gráfico de candlestick
-                fig = go.Figure(data=[go.Candlestick(
-                    x=df_plot.index,
-                    open=df_plot['Open'],
-                    high=df_plot['High'],
-                    low=df_plot['Low'],
-                    close=df_plot['Close'],
-                    name='Candlesticks'
-                )])
+                    # Calcular indicadores
+                    if add_sma:
+                        df_plot[f"SMA_{sma_period}"] = df_plot["Close"].rolling(window=sma_period).mean()
+                        df_plot.dropna(inplace=True)  # Remove linhas vazias
+                    if add_ema:
+                        df_plot[f"EMA_{ema_period}"] = df_plot["Close"].ewm(span=ema_period, adjust=False).mean()
+                        df_plot.dropna(inplace=True)  # Remove linhas vazias
 
-                if add_sma:
-                    fig.add_trace(go.Scatter(
+                    # Criar gráfico de candlestick
+                    fig = go.Figure()
+
+                    # Adicionar candlestick
+                    fig.add_trace(go.Candlestick(
                         x=df_plot.index,
-                        y=df_plot[f"SMA_{sma_period}"],
-                        mode='lines',
-                        name=f"SMA {sma_period}",
-                        line=dict(color="blue")
+                        open=df_plot['Open'],
+                        high=df_plot['High'],
+                        low=df_plot['Low'],
+                        close=df_plot['Close'],
+                        name='Candlesticks'
                     ))
 
-                if add_ema:
-                    fig.add_trace(go.Scatter(
-                        x=df_plot.index,
-                        y=df_plot[f"EMA_{ema_period}"],
-                        mode='lines',
-                        name=f"EMA {ema_period}",
-                        line=dict(color="orange")
-                    ))
+                    # Adicionar indicadores (se ativados)
+                    if add_sma:
+                        fig.add_trace(go.Scatter(
+                            x=df_plot.index,
+                            y=df_plot[f"SMA_{sma_period}"],
+                            mode='lines',
+                            name=f"SMA {sma_period}",
+                            line=dict(color="blue")
+                        ))
 
-                fig.update_layout(
-                    title=f"{ticker} - Gráfico de Candlestick ({interval_display})",
-                    xaxis_title="Data",
-                    yaxis_title="Preço",
-                    xaxis_rangeslider_visible=False,
-                    template=selected_theme["plot_template"],
-                    height=800
-                )
+                    if add_ema:
+                        fig.add_trace(go.Scatter(
+                            x=df_plot.index,
+                            y=df_plot[f"EMA_{ema_period}"],
+                            mode='lines',
+                            name=f"EMA {ema_period}",
+                            line=dict(color="orange")
+                        ))
 
-                st.plotly_chart(fig, use_container_width=True)
+                    # Layout do gráfico
+                    fig.update_layout(
+                        title=f"{ticker} - Gráfico de Candlestick ({interval_display})",
+                        xaxis_title="Data",
+                        yaxis_title="Preço",
+                        xaxis_rangeslider_visible=False,
+                        template=selected_theme["plot_template"],
+                        height=800
+                    )
+
+                    # Mostrar gráfico
+                    st.plotly_chart(fig, use_container_width=True)
 
         with tab2:
             st.subheader("Indicadores Técnicos Adicionais")
