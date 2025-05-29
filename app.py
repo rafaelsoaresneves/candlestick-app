@@ -173,7 +173,7 @@ try:
 
                 # Set the chart title and labels
                 fig.update_layout(
-                    title=f'Candlestick Chart of {ticker}',
+                    title=f'Candlestick Chart of {symbol}',
                     xaxis_title='Date',
                     yaxis_title='Price',
                     xaxis_rangeslider_visible=False,
