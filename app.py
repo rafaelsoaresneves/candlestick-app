@@ -70,6 +70,13 @@ period_days = st.sidebar.slider(
     value=60  # Padrão: 60 dias
 )
 
+# Indicadores técnicos no Sidebar
+st.sidebar.subheader("📈 Indicadores Técnicos")
+add_sma = st.sidebar.checkbox("Média Móvel Simples (SMA)")
+add_ema = st.sidebar.checkbox("Média Móvel Exponencial (EMA)")
+add_rsi = st.sidebar.checkbox("RSI (Relative Strength Index)")
+add_macd = st.sidebar.checkbox("MACD")
+
 # Botão para forçar atualização
 if st.sidebar.button("🔄 Atualizar Dados"):
     st.cache_data.clear()
@@ -129,22 +136,17 @@ try:
                     if not isinstance(df_plot.index, pd.DatetimeIndex):
                         df_plot.index = pd.to_datetime(df_plot.index)
 
-                    # Indicadores técnicos
-                    add_sma = st.checkbox("Adicionar Média Móvel Simples (SMA)")
-                    sma_period = st.number_input("Período da SMA", min_value=2, max_value=100, value=9, disabled=not add_sma)
-
-                    add_ema = st.checkbox("Adicionar Média Móvel Exponencial (EMA)")
-                    ema_period = st.number_input("Período da EMA", min_value=2, max_value=100, value=21, disabled=not add_ema)
-
                     # Calcular indicadores
                     if add_sma:
+                        sma_period = st.slider("Período da SMA", min_value=2, max_value=100, value=9)
                         df_plot[f"SMA_{sma_period}"] = df_plot["Close"].rolling(window=sma_period).mean()
 
                     if add_ema:
+                        ema_period = st.slider("Período da EMA", min_value=2, max_value=100, value=21)
                         df_plot[f"EMA_{ema_period}"] = df_plot["Close"].ewm(span=ema_period, adjust=False).mean()
 
+
                     # Criar gráfico de candlestick
-                    # Create candlestick chart
                     fig = go.Figure(data=[go.Candlestick(x=data.index,
                                      open=data['Open'],
                                      high=data['High'],
@@ -171,9 +173,14 @@ try:
                         ))
 
                     # Set the chart title and labels
-                    fig.update_layout(title=f'Candlestick Chart of {ticker}',
-                                    xaxis_title='Date',
-                                    yaxis_title='Price')
+                    fig.update_layout(
+                        title=f'Candlestick Chart of {ticker}',
+                        xaxis_title='Date',
+                        yaxis_title='Price',
+                        xaxis_rangeslider_visible=False,
+                        template=selected_theme["plot_template"],
+                        height=800
+                    )
 
                     # Display the chart
                     fig.show()
