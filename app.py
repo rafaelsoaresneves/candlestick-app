@@ -124,17 +124,25 @@ try:
                         df_plot.dropna(inplace=True)  # Remove linhas vazias
 
                     # Criar gráfico de candlestick
-                    fig = go.Figure()
-
-                    # Adicionar candlestick
-                    fig.add_trace(go.Candlestick(
+                    fig = go.Figure(data=[go.Candlestick(
                         x=df_plot.index,
                         open=df_plot['Open'],
                         high=df_plot['High'],
                         low=df_plot['Low'],
-                        close=df_plot['Close']
-                        #name='Candlesticks'
-                    ))
+                        close=df_plot['Close'])]
+                    )
+                    
+                    fig.show()
+
+                    # Adicionar candlestick
+                    #fig.add_trace(go.Candlestick(
+                    #    x=df_plot.index,
+                    #    open=df_plot['Open'],
+                    #    high=df_plot['High'],
+                    #    low=df_plot['Low'],
+                    #    close=df_plot['Close']
+                    #    name='Candlesticks'
+                    #))
 
                     # Adicionar indicadores (se ativados)
                     if add_sma:
@@ -161,11 +169,10 @@ try:
                         xaxis_title="Data",
                         yaxis_title="Preço",
                         xaxis_rangeslider_visible=False,
-                        template=selected_theme["plot_template"],
+                        #template=selected_theme["plot_template"],
+                        template=selected_theme["plotly_dark"],
                         height=800
                     )
-
-                    fig.show()
 
                     # Mostrar gráfico
                     st.plotly_chart(fig, use_container_width=True)
