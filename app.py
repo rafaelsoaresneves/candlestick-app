@@ -111,7 +111,7 @@ try:
     #ticker = yf.Ticker(symbol)
     #data = ticker.history(period="3mo")
 
-    #end_date = datetime.now()
+    end_date = datetime.now()
     #start_date = end_date - timedelta(days=period_days)
     #data = yf.download("AAPL", start="2025-01-01", end="2025-01-28", interval="1d")
     data = yf.download("AAPL", start="2020-01-01", end=end_date)
