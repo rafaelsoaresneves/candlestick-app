@@ -123,16 +123,16 @@ try:
                         df_plot[f"EMA_{ema_period}"] = df_plot["Close"].ewm(span=ema_period, adjust=False).mean()
                         df_plot.dropna(inplace=True)  # Remove linhas vazias
 
-                    # Criar gráfico de candlestick
-                    fig = go.Figure(data=[go.Candlestick(
+                    fig = go.Figure()
+
+                    fig.add_trace(go.Candlestick(
                         x=df_plot.index,
                         open=df_plot['Open'],
                         high=df_plot['High'],
                         low=df_plot['Low'],
-                        close=df_plot['Close'])]
-                    )
-                    
-                    fig.show()
+                        close=df_plot['Close'],
+                        name='Candlesticks'
+                    ))
 
                     # Adicionar candlestick
                     #fig.add_trace(go.Candlestick(
@@ -140,7 +140,7 @@ try:
                     #    open=df_plot['Open'],
                     #    high=df_plot['High'],
                     #    low=df_plot['Low'],
-                    #    close=df_plot['Close']
+                    #    close=df_plot['Close'],
                     #    name='Candlesticks'
                     #))
 
@@ -172,6 +172,8 @@ try:
                         template=selected_theme["plot_template"],
                         height=800
                     )
+                    
+                    fig.show()
 
                     # Mostrar gráfico
                     st.plotly_chart(fig, use_container_width=True)
