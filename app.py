@@ -156,7 +156,7 @@ try:
 
 
                 # Criar gráfico de candlestick
-                fig = go.Figure(data=[go.Candlestick(x=data['Date'],
+                fig = go.Figure(data=[go.Candlestick(x=data.index,
                                     open=data['Open'],
                                     high=data['High'],
                                     low=data['Low'],
