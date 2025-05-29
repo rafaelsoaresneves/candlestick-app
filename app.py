@@ -116,7 +116,7 @@ try:
     print(symbol)
     print(start_date)
     print(end_date)
-    data = yf.download("AAPL", start=start_date, end=end_date)
+    data = yf.download("AAPL", start=start_date, end=end_date, interval="1d")
     
     #data = get_data(symbol, interval, period_days)
     
