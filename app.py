@@ -90,7 +90,7 @@ if st.sidebar.button("🔄 Atualizar Dados"):
 def get_data(ticker_, interval_, period_days_):
     end_date = datetime.now()
     start_date = end_date - timedelta(days=period_days_)
-    data = yf.download("AAPL", start=start_date, end=end_date, interval=interval_)
+    data = yf.download("AAPL", start="2022-01-01", end="2022-12-31")
     #data = yf.download(
     #    tickers=ticker_,
     #    start=start_date,
