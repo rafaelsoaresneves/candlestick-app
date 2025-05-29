@@ -60,7 +60,7 @@ period_days = st.sidebar.slider("Período (dias)", min_value=1, max_value=60, va
 # Botão para forçar atualização
 if st.sidebar.button("🔄 Atualizar Dados"):
     st.cache_data.clear()
-    st.rerun()  # <-- Corrigido aqui!
+    st.rerun()
 
 # Tabs principais
 tab1, tab2 = st.tabs(["📈 Gráfico de Preço", "📉 Análise Técnica"])
@@ -78,11 +78,6 @@ def get_data(ticker_, interval_, period_days_):
     )
     if not data.empty:
         data.dropna(inplace=True)  # Remove linhas vazias
-
-        # Garantir que o índice seja DatetimeIndex
-        if not isinstance(data.index, pd.DatetimeIndex):
-            data.index = pd.to_datetime(data.index)
-
     return data
 
 # Carregando os dados
@@ -123,14 +118,13 @@ try:
                     # Calcular indicadores
                     if add_sma:
                         df_plot[f"SMA_{sma_period}"] = df_plot["Close"].rolling(window=sma_period).mean()
-
+                        df_plot.dropna(inplace=True)  # Remove linhas vazias
                     if add_ema:
                         df_plot[f"EMA_{ema_period}"] = df_plot["Close"].ewm(span=ema_period, adjust=False).mean()
+                        df_plot.dropna(inplace=True)  # Remove linhas vazias
 
-                    # Criar gráfico de candlestick
                     fig = go.Figure()
 
-                    # Adicionar candlestick
                     fig.add_trace(go.Candlestick(
                         x=df_plot.index,
                         open=df_plot['Open'],
@@ -139,6 +133,16 @@ try:
                         close=df_plot['Close'],
                         name='Candlesticks'
                     ))
+
+                    # Adicionar candlestick
+                    #fig.add_trace(go.Candlestick(
+                    #    x=df_plot.index,
+                    #    open=df_plot['Open'],
+                    #    high=df_plot['High'],
+                    #    low=df_plot['Low'],
+                    #    close=df_plot['Close'],
+                    #    name='Candlesticks'
+                    #))
 
                     # Adicionar indicadores (se ativados)
                     if add_sma:
@@ -168,11 +172,15 @@ try:
                         #template=selected_theme["plot_template"],
                         height=800
                     )
+                    
+                    # reset Plotly theme after streamlit import
+                    import plotly.io as pio
+                    pio.templates.default = 'plotly' 
+                    #fig.show()
 
                     # Mostrar gráfico
-                    #st.plotly_chart(fig, use_container_width=True)
-                    st.plotly_chart(fig, theme='streamlit', use_container_width=True)
-
+                    #st.plotly_chart(fig, theme='streamlit', use_container_width=True)
+                    st.plotly_chart(fig, theme='streamlit')
 
         with tab2:
             st.subheader("Indicadores Técnicos Adicionais")
