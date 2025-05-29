@@ -115,6 +115,9 @@ try:
     #start_date = end_date - timedelta(days=period_days)
     #data = yf.download("AAPL", start="2025-01-01", end="2025-01-28", interval="1d")
     data = yf.download("AAPL", start="2020-01-01", end=end_date)
+    data.reset_index(inplace=True)  # Make it no longer an Index
+    data['Date'] = pandas.to_datetime(data['Date'], format="%Y/%m/%d")  
+    
     #data = data.stack().reset_index().rename(index=str, columns={"level_1": "Symbol"}).sort_values(['Date'])
     #data = get_data(symbol, interval, period_days)
     
