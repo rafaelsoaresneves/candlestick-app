@@ -22,3 +22,8 @@ Este é um aplicativo web interativo feito com **Streamlit** e **Plotly** que ex
 
    ```bash
    pip install -r requirements.txt
+
+3. Execute o comando:
+   
+   ```bash
+   streamlit run app.py
