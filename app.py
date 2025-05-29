@@ -190,7 +190,7 @@ try:
             # MACD
             add_macd = st.checkbox("Mostrar MACD (Moving Average Convergence Divergence)")
 
-            df_ta = df.copy()
+            df_ta = data.copy()
 
             # Cálculo do RSI
             if add_rsi:
@@ -227,7 +227,7 @@ try:
 
             # Mostrar dados brutos (opcional)
             if st.checkbox("Mostrar dados brutos"):
-                st.dataframe(df.tail(100))
+                st.dataframe(data.tail(100))
 
 except Exception as e:
     st.error(f"❌ Ocorreu um erro ao carregar os dados: {e}")
