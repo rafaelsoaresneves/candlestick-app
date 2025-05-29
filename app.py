@@ -109,8 +109,8 @@ def get_data(ticker_, interval_, period_days_):
 # Carregando os dados
 try:
     #ticker = yf.Ticker(symbol)
-    #data = ticker.history(period="2mo")
-    data = get_data(symbol, interval, period_days)
+    data = ticker.history(period="2mo")
+    #data = get_data(symbol, interval, period_days)
     
     if data.empty:
         st.warning("⚠️ Nenhum dado encontrado. Verifique o ticker ou período.")
