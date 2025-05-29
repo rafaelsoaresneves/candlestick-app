@@ -100,19 +100,22 @@ def get_data(ticker_, interval_, period_days_):
 
 # Carregando os dados
 try:
-    df = get_data(ticker, interval, period_days)
+    #df = get_data(ticker, interval, period_days)
 
-    if df.empty:
+    ticker = yf.Ticker(symbol)
+    data = ticker.history(period="2mo")
+
+    if data.empty:
         st.warning("⚠️ Nenhum dado encontrado. Verifique o ticker ou período.")
     else:
         with tab1:
             st.subheader("Gráfico de Candlestick")
 
-            if len(df) < 2:
+            if len(data) < 2:
                 st.warning("⚠️ Poucos dados para exibir o gráfico.")
             else:
                 required_columns = ['Open', 'High', 'Low', 'Close']
-                missing_cols = [col for col in required_columns if col not in df.columns]
+                missing_cols = [col for col in required_columns if col not in data.columns]
 
                 if missing_cols:
                     st.error(f"❌ Faltando colunas no dataset: {missing_cols}")
@@ -120,7 +123,7 @@ try:
                     st.success("✅ Dados carregados. Gerando gráfico...")
 
                     # Copiar dados para evitar alterações no original
-                    df_plot = df.copy()
+                    df_plot = data.copy()
 
                     # Garantir índice como datetime
                     if not isinstance(df_plot.index, pd.DatetimeIndex):
@@ -142,11 +145,11 @@ try:
 
                     # Criar gráfico de candlestick
                     # Create candlestick chart
-                    fig = go.Figure(data=[go.Candlestick(x=df.index,
-                                     open=df['Open'],
-                                     high=df['High'],
-                                     low=df['Low'],
-                                     close=df['Close'])])
+                    fig = go.Figure(data=[go.Candlestick(x=data.index,
+                                     open=data['Open'],
+                                     high=data['High'],
+                                     low=data['Low'],
+                                     close=data['Close'])])
 
                     # Adicionar indicadores (se ativados)
                     if add_sma:
