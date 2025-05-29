@@ -132,8 +132,8 @@ try:
                         open=df_plot['Open'],
                         high=df_plot['High'],
                         low=df_plot['Low'],
-                        close=df_plot['Close'],
-                        name='Candlesticks'
+                        close=df_plot['Close']
+                        #name='Candlesticks'
                     ))
 
                     # Adicionar indicadores (se ativados)
@@ -161,9 +161,12 @@ try:
                         xaxis_title="Data",
                         yaxis_title="Preço",
                         xaxis_rangeslider_visible=False,
-                        template=selected_theme["plot_template"],
+                        #template=selected_theme["plot_template"],
+                        template=selected_theme["plotly_dark"],
                         height=800
                     )
+
+                    fig.show()
 
                     # Mostrar gráfico
                     st.plotly_chart(fig, use_container_width=True)
