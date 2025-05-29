@@ -42,7 +42,7 @@ st.markdown(f"""
 
 # Configurações do usuário
 st.sidebar.header("Configurações")
-ticker = st.sidebar.text_input("Ticker do Ativo", value="AAPL")
+symbol = st.sidebar.text_input("Ticker do Ativo", value="AAPL")
 
 interval_options = {
     "1 minuto": "1m",
