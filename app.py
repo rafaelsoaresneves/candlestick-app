@@ -60,7 +60,7 @@ period_days = st.sidebar.slider("Período (dias)", min_value=1, max_value=60, va
 # Botão para forçar atualização
 if st.sidebar.button("🔄 Atualizar Dados"):
     st.cache_data.clear()
-    st.experimental_rerun()
+    st.rerun()
 
 # Tabs principais
 tab1, tab2 = st.tabs(["📈 Gráfico de Preço", "📉 Análise Técnica"])
