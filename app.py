@@ -4,48 +4,45 @@ import plotly.graph_objects as go
 import pandas as pd
 from datetime import datetime, timedelta
 
-# Configurações iniciais
+# Configuração inicial do Streamlit
 st.set_page_config(page_title="Gráfico de Candlestick", layout="wide")
 st.title("📊 Gráfico de Candlestick Interativo com Indicadores")
 
-# Estilos customizados para temas
+# Definição dos temas
 THEMES = {
     "Escuro": {
-        "background_color": "#0e1117",
-        "text_color": "#fafafa",
+        "background": "#0e1117",
+        "text": "#fafafa",
         "plot_template": "plotly_dark"
     },
     "Claro": {
-        "background_color": "#ffffff",
-        "text_color": "#000000",
+        "background": "#ffffff",
+        "text": "#000000",
         "plot_template": "plotly_white"
     }
 }
 
-# Escolha do tema
-theme = st.sidebar.selectbox("Tema", options=list(THEMES.keys()))
+# Seleção de tema
+theme = st.sidebar.selectbox("Escolha o Tema", list(THEMES.keys()))
 selected_theme = THEMES[theme]
 
-# Aplicando estilo personalizado à página
+# Aplicando estilo customizado ao corpo da página
 st.markdown(f"""
-    <style>
-        body {{
-            background-color: {selected_theme['background_color']};
-            color: {selected_theme['text_color']};
-        }}
-        .sidebar .sidebar-content {{
-            background-color: {selected_theme['background_color']};
-        }}
-    </style>
+<style>
+    body {{
+        background-color: {selected_theme['background']};
+        color: {selected_theme['text']};
+    }}
+    .sidebar .sidebar-content {{
+        background-color: {selected_theme['background']};
+    }}
+</style>
 """, unsafe_allow_html=True)
 
-# Sidebar para configurações
+# Configurações do usuário
 st.sidebar.header("Configurações")
+ticker = st.sidebar.text_input("Ticker do Ativo", value="AAPL")
 
-# Seleção do ativo
-ticker = st.sidebar.text_input("Código do Ativo", value="AAPL")
-
-# Intervalos disponíveis no Yahoo Finance
 interval_options = {
     "1 minuto": "1m",
     "5 minutos": "5m",
@@ -57,44 +54,43 @@ interval_options = {
 interval_display = st.sidebar.selectbox("Intervalo", options=list(interval_options.keys()))
 interval = interval_options[interval_display]
 
-# Período desejado
 period_days = st.sidebar.slider("Período (dias)", min_value=1, max_value=60, value=7)
 
 # Indicadores técnicos
-st.sidebar.subheader("Indicadores Técnicos")
 add_sma = st.sidebar.checkbox("Adicionar Média Móvel Simples (SMA)")
 sma_period = st.sidebar.number_input("Período da SMA", min_value=2, max_value=100, value=9, disabled=not add_sma)
 
 add_ema = st.sidebar.checkbox("Adicionar Média Móvel Exponencial (EMA)")
 ema_period = st.sidebar.number_input("Período da EMA", min_value=2, max_value=100, value=21, disabled=not add_ema)
 
-# Baixar dados
-@st.cache_data(ttl=3600)  # Cache por 1 hora
-def get_data(ticker, interval, period_days):
+# Função para carregar dados
+@st.cache_data(ttl=300)  # Cache por 5 minutos
+def get_data(ticker_, interval_, period_days_):
     end_date = datetime.now()
-    start_date = end_date - timedelta(days=period_days)
+    start_date = end_date - timedelta(days=period_days_)
     data = yf.download(
-        tickers=ticker,
+        tickers=ticker_,
         start=start_date,
         end=end_date,
-        interval=interval
+        interval=interval_
     )
     return data
 
+# Carregando os dados
 try:
     df = get_data(ticker, interval, period_days)
 
     if df.empty:
-        st.warning("Nenhum dado encontrado. Verifique o ticker ou período.")
+        st.warning("⚠️ Nenhum dado encontrado. Verifique o ticker ou período.")
     else:
-        # Adicionar indicadores
+        # Adicionando indicadores
         if add_sma:
             df[f"SMA_{sma_period}"] = df["Close"].rolling(window=sma_period).mean()
 
         if add_ema:
             df[f"EMA_{ema_period}"] = df["Close"].ewm(span=ema_period, adjust=False).mean()
 
-        # Plotando o candlestick
+        # Criando o gráfico de candlestick
         fig = go.Figure(data=[go.Candlestick(
             x=df.index,
             open=df['Open'],
@@ -104,16 +100,14 @@ try:
             name='Candlesticks'
         )])
 
-        # Adicionando indicadores ao gráfico
-        colors = {"SMA": "blue", "EMA": "orange"}
-
+        # Adicionando indicadores
         if add_sma:
             fig.add_trace(go.Scatter(
                 x=df.index,
                 y=df[f"SMA_{sma_period}"],
                 mode='lines',
                 name=f"SMA {sma_period}",
-                line=dict(color=colors["SMA"])
+                line=dict(color="blue")
             ))
 
         if add_ema:
@@ -122,9 +116,10 @@ try:
                 y=df[f"EMA_{ema_period}"],
                 mode='lines',
                 name=f"EMA {ema_period}",
-                line=dict(color=colors["EMA"])
+                line=dict(color="orange")
             ))
 
+        # Layout do gráfico
         fig.update_layout(
             title=f"{ticker} - Gráfico de Candlestick ({interval_display})",
             xaxis_title="Data",
@@ -134,11 +129,12 @@ try:
             height=800
         )
 
+        # Mostrar gráfico
         st.plotly_chart(fig, use_container_width=True)
 
-        # Mostrar tabela de dados (opcional)
+        # Mostrar dados brutos (opcional)
         if st.checkbox("Mostrar dados brutos"):
             st.dataframe(df.tail(100))
 
 except Exception as e:
-    st.error(f"Erro ao carregar dados: {e}")
+    st.error(f"❌ Ocorreu um erro ao carregar os dados: {e}")
