@@ -230,7 +230,7 @@ try:
 
                 # Mostrar dados brutos (opcional)
                 if st.checkbox("Mostrar dados brutos"):
-                    st.dataframe(df.tail(100))
+                    st.dataframe(data.tail(100))
         
 
 except Exception as e:
