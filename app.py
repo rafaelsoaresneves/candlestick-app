@@ -161,8 +161,7 @@ try:
                         xaxis_title="Data",
                         yaxis_title="Preço",
                         xaxis_rangeslider_visible=False,
-                        #template=selected_theme["plot_template"],
-                        template=selected_theme["plotly_dark"],
+                        template=selected_theme["plot_template"],
                         height=800
                     )
 
