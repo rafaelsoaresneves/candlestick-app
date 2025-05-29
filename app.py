@@ -142,11 +142,11 @@ try:
 
                     # Criar gráfico de candlestick
                     # Create candlestick chart
-                    fig = go.Figure(data=[go.Candlestick(x=data.index,
-                                     open=data['Open'],
-                                     high=data['High'],
-                                     low=data['Low'],
-                                     close=data['Close'])])
+                    fig = go.Figure(data=[go.Candlestick(x=df.index,
+                                     open=df['Open'],
+                                     high=df['High'],
+                                     low=df['Low'],
+                                     close=df['Close'])])
 
                     # Adicionar indicadores (se ativados)
                     if add_sma:
