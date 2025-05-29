@@ -40,8 +40,43 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
+# Configurações do usuário
+st.sidebar.header("Configurações")
+symbol = st.sidebar.text_input("Ticker do Ativo", value="AAPL")
+
+interval_options = {
+    "1 minuto": "1m",
+    "5 minutos": "5m",
+    "15 minutos": "15m",
+    "30 minutos": "30m",
+    "1 hora": "60m",
+    "1 dia": "1d"
+}
+
+# Definir intervalo padrão como "1 dia"
+interval_display = st.sidebar.selectbox(
+    "Intervalo", 
+    options=list(interval_options.keys()),
+    index=list(interval_options.keys()).index("1 dia")  # Padrão: 1 dia
+)
+
+interval = interval_options[interval_display]
+
+# Definir período padrão como 60 dias
+period_days = st.sidebar.slider(
+    "Período (dias)", 
+    min_value=1, 
+    max_value=60, 
+    value=60  # Padrão: 60 dias
+)
+
+# Botão para forçar atualização
+if st.sidebar.button("🔄 Atualizar Dados"):
+    st.cache_data.clear()
+    st.rerun()
+
 # Retrieve AAPL historical data
-symbol = "AAPL"
+#symbol = "AAPL"
 ticker = yf.Ticker(symbol)
 data = ticker.history(period="2mo")
 
