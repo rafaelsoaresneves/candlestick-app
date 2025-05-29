@@ -90,12 +90,13 @@ if st.sidebar.button("🔄 Atualizar Dados"):
 def get_data(ticker_, interval_, period_days_):
     end_date = datetime.now()
     start_date = end_date - timedelta(days=period_days_)
-    data = yf.download(
-        tickers=ticker_,
-        start=start_date,
-        end=end_date,
-        interval=interval_
-    )
+    data = yf.download(ticker_, start=start_date, end=end_date, interval=interval_)
+    #data = yf.download(
+    #    tickers=ticker_,
+    #    start=start_date,
+    #    end=end_date,
+    #    interval=interval_
+    #)
     if not data.empty:
         data.dropna(inplace=True)  # Remove linhas vazias
 
