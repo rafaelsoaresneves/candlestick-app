@@ -165,12 +165,14 @@ try:
                         xaxis_title="Data",
                         yaxis_title="Preço",
                         xaxis_rangeslider_visible=False,
-                        template=selected_theme["plot_template"],
+                        #template=selected_theme["plot_template"],
                         height=800
                     )
 
                     # Mostrar gráfico
-                    st.plotly_chart(fig, use_container_width=True)
+                    #st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, theme='streamlit', use_container_width=True)
+
 
         with tab2:
             st.subheader("Indicadores Técnicos Adicionais")
