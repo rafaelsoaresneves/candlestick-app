@@ -117,7 +117,7 @@ try:
     data = yf.download("AAPL", start="2020-01-01", end=end_date)
     data.reset_index(inplace=True)  # Make it no longer an Index
     data['Date'] = pd.to_datetime(data['Date'], format="%Y/%m/%d") 
-    data = data['Date','Open', 'High', 'Low', 'Close']
+    data = data[['Date','Open', 'High', 'Low', 'Close']]
     
     #data = data.stack().reset_index().rename(index=str, columns={"level_1": "Symbol"}).sort_values(['Date'])
     #data = get_data(symbol, interval, period_days)
