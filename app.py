@@ -55,7 +55,7 @@ interval_options = {
 
 # Definir intervalo padrão como "1 dia"
 interval_display = st.sidebar.selectbox(
-    "Intervalo", 
+    "Intervalo",
     options=list(interval_options.keys()),
     index=list(interval_options.keys()).index("1 dia")  # Padrão: 1 dia
 )
@@ -64,9 +64,9 @@ interval = interval_options[interval_display]
 
 # Definir período padrão como 60 dias
 period_days = st.sidebar.slider(
-    "Período (dias)", 
-    min_value=1, 
-    max_value=60, 
+    "Período (dias)",
+    min_value=1,
+    max_value=60,
     value=60  # Padrão: 60 dias
 )
 
@@ -82,48 +82,36 @@ if st.sidebar.button("🔄 Atualizar Dados"):
     st.cache_data.clear()
     st.rerun()
 
+
 # Tabs principais
-#tab1, tab2 = st.tabs(["📈 Gráfico de Preço", "📉 Análise Técnica"])
+# tab1, tab2 = st.tabs(["📈 Gráfico de Preço", "📉 Análise Técnica"])
 
 # Função para carregar dados
-#@st.cache_data(ttl=300)
+# @st.cache_data(ttl=300)
 def get_data(ticker_, interval_, period_days_):
     end_date = datetime.now()
     start_date = end_date - timedelta(days=period_days_)
     data = yf.download("AAPL", start="2022-01-01", end="2022-12-31")
-    #data = yf.download(
+    # data = yf.download(
     #    tickers=ticker_,
     #    start=start_date,
     #    end=end_date,
     #    interval=interval_
-    #)
+    # )
     if not data.empty:
         data.dropna(inplace=True)  # Remove linhas vazias
 
         # Garantir que o índice seja DatetimeIndex
-        #if not isinstance(data.index, pd.DatetimeIndex):
+        # if not isinstance(data.index, pd.DatetimeIndex):
         #    data.index = pd.to_datetime(data.index)
 
     return data
 
+
 # Carregando os dados
 try:
-    #ticker = yf.Ticker(symbol)
-    #data = ticker.history(period="3mo")
-
-    #end_date = datetime.now()
-    #start_date = end_date - timedelta(days=period_days)
-    #data = yf.download("AAPL", start="2025-01-01", end="2025-01-28", interval="1d")
-    #data = yf.download("AAPL", start="2020-01-01", end=end_date)
-    #data.reset_index(inplace=True)  # Make it no longer an Index
-    #data['Date'] = pd.to_datetime(data['Date'], format="%Y/%m/%d") 
-    #data = data[['Date','Open', 'High', 'Low', 'Close']]
-    
-    #data = data.stack().reset_index().rename(index=str, columns={"level_1": "Symbol"}).sort_values(['Date'])
-    #data = get_data(symbol, interval, period_days)
-
     data = yf.download(tickers='BTC-USD', period='1d', interval='15m')
-    
+
     if data.empty:
         st.warning("⚠️ Nenhum dado encontrado. Verifique o ticker ou período.")
     else:
@@ -156,13 +144,12 @@ try:
                     ema_period = st.slider("Período da EMA", min_value=2, max_value=100, value=21)
                     df_plot[f"EMA_{ema_period}"] = df_plot["Close"].ewm(span=ema_period, adjust=False).mean()
 
-
                 # Criar gráfico de candlestick
                 fig = go.Figure(data=[go.Candlestick(x=data.index,
-                                    open=data['Open'],
-                                    high=data['High'],
-                                    low=data['Low'],
-                                    close=data['Close'])])
+                                                     open=data['Open'],
+                                                     high=data['High'],
+                                                     low=data['Low'],
+                                                     close=data['Close'])])
 
                 # Adicionar indicadores (se ativados)
                 if add_sma:
@@ -227,15 +214,17 @@ try:
 
                     fig_macd = go.Figure()
                     fig_macd.add_trace(go.Scatter(x=df_plot.index, y=df_plot['MACD'], mode='lines', name='MACD'))
-                    fig_macd.add_trace(go.Scatter(x=df_plot.index, y=df_plot['Signal_Line'], mode='lines', name='Linha de Sinal'))
-                    fig_macd.add_trace(go.Bar(x=df_plot.index, y=df_plot['MACD'] - df_plot['Signal_Line'], name='Histograma'))
+                    fig_macd.add_trace(
+                        go.Scatter(x=df_plot.index, y=df_plot['Signal_Line'], mode='lines', name='Linha de Sinal'))
+                    fig_macd.add_trace(
+                        go.Bar(x=df_plot.index, y=df_plot['MACD'] - df_plot['Signal_Line'], name='Histograma'))
                     fig_macd.update_layout(title="MACD", template=selected_theme["plot_template"])
                     st.plotly_chart(fig_macd, use_container_width=True)
 
                 # Mostrar dados brutos (opcional)
                 if st.checkbox("Mostrar dados brutos"):
                     st.dataframe(data.tail(100))
-        
+
 
 except Exception as e:
     st.error(f"❌ Ocorreu um erro ao carregar os dados: {e}")
