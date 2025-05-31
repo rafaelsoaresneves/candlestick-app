@@ -66,8 +66,8 @@ interval = interval_options[interval_display]
 period_days = st.sidebar.slider(
     "Período (dias)",
     min_value=1,
-    max_value=60,
-    value=60  # Padrão: 60 dias
+    max_value=180,
+    value=10  # Padrão: 10 dias
 )
 
 # Indicadores técnicos no Sidebar
@@ -91,7 +91,7 @@ if st.sidebar.button("🔄 Atualizar Dados"):
 def get_data(ticker_, interval_, period_days_):
     end_date = datetime.now()
     start_date = end_date - timedelta(days=period_days_)
-    data = yf.download("AAPL", start="2022-01-01", end="2022-12-31")
+    #data = yf.download("AAPL", start="2022-01-01", end="2022-12-31")
     # data = yf.download(
     #    tickers=ticker_,
     #    start=start_date,
@@ -110,7 +110,15 @@ def get_data(ticker_, interval_, period_days_):
 
 # Carregando os dados
 try:
-    data = yf.download(tickers='BTC-USD', period='1mo', interval='15m')
+    df = pd.read_csv("btc_15m.csv")
+    # convert date column to datetime object
+    df['Date'] = pd.to_datetime(df['Open time'])
+    df = df[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
+    # filter dataframe by date
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=period_days)
+    mask = (df['Date'] >= start_date) & (df['Date'] <= end_date)
+    data = df.loc[mask]
 
     if data.empty:
         st.warning("⚠️ Nenhum dado encontrado. Verifique o ticker ou período.")
