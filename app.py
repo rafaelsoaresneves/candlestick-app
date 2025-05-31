@@ -110,7 +110,7 @@ def get_data(ticker_, interval_, period_days_):
 
 # Carregando os dados
 try:
-    data = yf.download(tickers='BTC-USD', period='1d', interval='15m')
+    data = yf.download(tickers='BTC-USD', period='1mo', interval='15m')
 
     if data.empty:
         st.warning("⚠️ Nenhum dado encontrado. Verifique o ticker ou período.")
