@@ -153,7 +153,7 @@ try:
                     df_plot[f"EMA_{ema_period}"] = df_plot["Close"].ewm(span=ema_period, adjust=False).mean()
 
                 # Criar gráfico de candlestick
-                fig = go.Figure(data=[go.Candlestick(x=data.index,
+                fig = go.Figure(data=[go.Candlestick(x=data['Date'],
                                                      open=data['Open'],
                                                      high=data['High'],
                                                      low=data['Low'],
